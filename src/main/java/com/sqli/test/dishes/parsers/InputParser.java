@@ -8,6 +8,7 @@ import com.sqli.test.dishes.utils.SignalParseResult;
 
 public interface InputParser
 {
+  double parseOrientation (final String orientationInput);
   DishParseResult parseDish (final String dishInput);
   SignalParseResult parseSignal (final String signalInput, final Map<? super String, ? extends Dish> satellites);
 }

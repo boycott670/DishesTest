@@ -9,15 +9,21 @@ import com.sqli.test.dishes.utils.SignalParseResult;
 public final class DefaultInputParser implements InputParser
 {
   @Override
+  public double parseOrientation(String orientationInput)
+  {
+    double orientation = Double.valueOf(orientationInput.substring(0, orientationInput.length() - 1));
+    
+    orientation *= orientationInput.charAt(orientationInput.length() - 1) == 'E' ? 1 : -1;
+    
+    return orientation;
+  }
+
+  @Override
   public DishParseResult parseDish(String dishInput)
   {
     final String[] tokens = dishInput.split(",");
     
-    double orientation = Double.valueOf(tokens[1].substring(0, tokens[1].length() - 1));
-    
-    orientation *= tokens[1].charAt(tokens[1].length() - 1) == 'E' ? 1 : -1;
-    
-    return DishParseResult.of(tokens[0], orientation);
+    return DishParseResult.of(tokens[0], parseOrientation(tokens[1]));
   }
 
   @Override

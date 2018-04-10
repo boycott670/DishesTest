@@ -48,4 +48,9 @@ public final class Dishes
     
     return signalStrengthPresenter.presentSignalStrength(signalStrength);
   }
+  
+  public void move (final String dishCode, final String orientation)
+  {
+    dishes.get(dishCode).move(inputParser.parseOrientation(orientation));
+  }
 }
