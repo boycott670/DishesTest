@@ -1,8 +1,8 @@
 package com.sqli.test.dishes;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import com.sqli.test.dishes.entities.Dish;
@@ -11,6 +11,7 @@ import com.sqli.test.dishes.parsers.InputParser;
 import com.sqli.test.dishes.presenters.DefaultSignalStrengthPresenter;
 import com.sqli.test.dishes.presenters.SignalStrengthPresenter;
 import com.sqli.test.dishes.utils.DishParseResult;
+import com.sqli.test.dishes.utils.SignalParseResult;
 
 public final class Dishes
 {
@@ -21,28 +22,32 @@ public final class Dishes
   public static final Dish HOTBIRD = Dish.stationaryDish(13);
   public static final Dish NILESAT = Dish.stationaryDish(-7);
   
-  private final Map<? super String, Dish> dishes;
+  private final Map<? super String, ? extends Dish> dishes;
+  private final Map<? super String, ? extends Dish> satellites;
   
   public Dishes (final String... dishesInputs)
   {
-    dishes = Arrays.stream(dishesInputs)
+    dishes = Collections.unmodifiableMap(Arrays.stream(dishesInputs)
       .map(inputParser::parseDish)
       .collect(Collectors.toMap(
           DishParseResult::getCode,
-          dishParseResult -> Dish.ofInitialOrientation(dishParseResult.getOrientation())));
+          dishParseResult -> Dish.ofInitialOrientation(dishParseResult.getOrientation()))));
     
-    dishes.put("A", ASTRA);
-    dishes.put("H", HOTBIRD);
-    dishes.put("N", NILESAT);
+    satellites = Collections.unmodifiableMap(Arrays.asList(
+      SignalParseResult.of("A", ASTRA),
+      SignalParseResult.of("H", HOTBIRD),
+      SignalParseResult.of("N", NILESAT))
+        .stream()
+        .collect(Collectors.toMap(SignalParseResult::getSignalName, SignalParseResult::getSatellite)));
   }
   
   public String signal (final String signalInput)
   {
-    final double signalStrength = dishes.entrySet()
+    final Dish targetSatellite = inputParser.parseSignal(signalInput, satellites).getSatellite();
+    
+    final double signalStrength = dishes.values()
       .stream()
-      .filter(entry -> !Arrays.asList("A", "H", "N").contains(entry.getKey()))
-      .map(Entry::getValue)
-      .mapToDouble(inputParser.parseSignal(signalInput, dishes).getSatellite()::distanceTo)
+      .mapToDouble(targetSatellite::distanceTo)
       .min()
       .getAsDouble();
     

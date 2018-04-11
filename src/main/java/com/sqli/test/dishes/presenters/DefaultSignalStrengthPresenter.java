@@ -1,7 +1,6 @@
 package com.sqli.test.dishes.presenters;
 
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.Collections;
 
 public final class DefaultSignalStrengthPresenter implements SignalStrengthPresenter
 {
@@ -10,19 +9,13 @@ public final class DefaultSignalStrengthPresenter implements SignalStrengthPrese
   {
     final int scaledSignalStrength = Integer.valueOf(String.format("%.0f", signalStrength / .1));
     
-    if (scaledSignalStrength > 10)
+    if (scaledSignalStrength >= 10)
     {
       return "No signal !";
     }
     
-    final String stars = IntStream.rangeClosed(scaledSignalStrength + 1, 10)
-        .mapToObj(__ -> "*")
-        .collect(Collectors.joining());
-      
-    final String dots = IntStream.rangeClosed(1, scaledSignalStrength)
-        .mapToObj(__ -> ".")
-        .collect(Collectors.joining());
-    
-    return String.format("|%s%s|", stars, dots);
+    return String.format("|%s%s|",
+        String.join("", Collections.nCopies(10 - scaledSignalStrength, "*")),
+        String.join("", Collections.nCopies(scaledSignalStrength, ".")));
   }
 }
